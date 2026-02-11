@@ -71,4 +71,14 @@ public class ChatRoomController {
                 service.getLastMessages(roomId, limit)
         );
     }
+    @DeleteMapping("/{roomId}")
+    public GenericResponse deleteRoom(@PathVariable String roomId) {
+
+        service.deleteRoom(roomId);
+
+        return new GenericResponse(
+                "Chat room '" + roomId + "' deleted successfully.",
+                "success"
+        );
+    }
 }

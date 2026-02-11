@@ -43,6 +43,14 @@ public class RedisChatRepository {
         );
     }
 
+    public boolean isParticipantMember(String roomId, String participant) {
+        return Boolean.TRUE.equals(
+                redisTemplate.opsForSet()
+                        .isMember(RedisKeyBuilder.participantsKey(roomId), participant)
+        );
+    }
+
+
     public void addParticipant(String roomId, String participant) {
         redisTemplate.opsForSet()
                 .add(RedisKeyBuilder.participantsKey(roomId), participant);
@@ -62,5 +70,28 @@ public class RedisChatRepository {
         return redisTemplate.opsForList()
                 .range(RedisKeyBuilder.messagesKey(roomId), -limit, -1);
     }
+
+    public void publishMessage(String roomId, String messageJson) {
+        redisTemplate.convertAndSend(
+                RedisKeyBuilder.channelKey(roomId),
+                messageJson
+        );
+    }
+    public boolean deleteRoom(String roomId) {
+
+        Long removed = redisTemplate.opsForSet()
+                .remove(RedisKeyBuilder.allChatRoomsKey(), roomId);
+
+        if (removed == null || removed == 0) {
+            return false; // room does not exist
+        }
+
+        redisTemplate.delete(RedisKeyBuilder.chatRoomKey(roomId));
+        redisTemplate.delete(RedisKeyBuilder.participantsKey(roomId));
+        redisTemplate.delete(RedisKeyBuilder.messagesKey(roomId));
+
+        return true;
+    }
+
 }
 

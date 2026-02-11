@@ -22,6 +22,13 @@ public class GlobalExceptionHandler {
                 .body(errorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(ParticipantNotInRoomException.class)
+    public ResponseEntity<?> handleParticipantNotInRoom(ParticipantNotInRoomException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errorResponse(ex.getMessage()));
+    }
+
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
         ex.printStackTrace();

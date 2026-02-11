@@ -2,6 +2,7 @@ package com.chatapp.chatapp.service;
 
 
 import com.chatapp.chatapp.exception.DuplicateRoomException;
+import com.chatapp.chatapp.exception.ParticipantNotInRoomException;
 import com.chatapp.chatapp.exception.RoomNotFoundException;
 import com.chatapp.chatapp.model.ChatMessage;
 import com.chatapp.chatapp.repository.RedisChatRepository;
@@ -49,6 +50,10 @@ public class ChatRoomService {
             throw new RoomNotFoundException(roomId);
         }
 
+        if (!repository.isParticipantMember(roomId, participant)) {
+            throw new ParticipantNotInRoomException(participant, roomId);
+        }
+
         ChatMessage chatMessage = ChatMessage.builder()
                 .participant(participant)
                 .message(message)
@@ -58,6 +63,7 @@ public class ChatRoomService {
         String messageJson = serialize(chatMessage);
 
         repository.saveMessage(roomId, messageJson);
+        repository.publishMessage(roomId, messageJson);
     }
 
 
@@ -87,6 +93,14 @@ public class ChatRoomService {
             return objectMapper.writeValueAsString(message);
         } catch (Exception e) {
             throw new RuntimeException("Failed to serialize message", e);
+        }
+    }
+    public void deleteRoom(String roomId) {
+
+        boolean deleted = repository.deleteRoom(roomId);
+
+        if (!deleted) {
+            throw new RoomNotFoundException(roomId);
         }
     }
 }
