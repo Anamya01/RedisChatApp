@@ -9,10 +9,14 @@ import java.util.Map;
 import java.util.Set;
 
 @Repository
-@RequiredArgsConstructor
 public class RedisChatRepository {
 
     private final StringRedisTemplate redisTemplate;
+
+    public RedisChatRepository(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
 
     public boolean createRoom(String roomId, Map<String, String> metadata) {
 
